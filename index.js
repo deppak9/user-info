@@ -26,7 +26,7 @@ app.use(async (req, res, next) => {
     const userAgent = useragent.parse(req.headers['user-agent']);
 
     req.userInfo = {
-      ip: ip,
+      ip: ipAddress,
       device: userAgent.device.toString(),
       os: userAgent.os.toString(),
       browser: userAgent.toAgent(),
