@@ -3,6 +3,7 @@ const axios = require('axios');
 const useragent = require('useragent');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
+var requestIp = require('request-ip');
 const IP = require('ip');
 
 const app = express();
@@ -11,22 +12,27 @@ const PORT = 3000;
 app.set('trust proxy', true)
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
-app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(async (req, res, next) => {
   try {
     const ipAddress = IP.address();
-    const response2 = await axios.get('http://api.ipify.org?format=json');
+    const ip2 = req.headers['x-forwarded-for'] ||req.socket.remoteAddress ||null;
 
-    const { ip } = response2.data;
-    const response = await axios.get(`http://ip-api.com/json/${ip}`);
+    //const response2 = await axios.get('http://api.ipify.org?format=json');
+    const ip = req.ip;
+    var clientIp = requestIp.getClientIp(req);
+
+    const response = await axios.get(`http://ip-api.com/json/${clientIp}`);
     const location = response.data;
 
 
     const userAgent = useragent.parse(req.headers['user-agent']);
 
     req.userInfo = {
-      ip: ipAddress,
+      private_ip: ipAddress,
+      public_ip: clientIp,
+      ip2: ip2,
       device: userAgent.device.toString(),
       os: userAgent.os.toString(),
       browser: userAgent.toAgent(),
