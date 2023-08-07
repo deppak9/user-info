@@ -12,6 +12,13 @@ const PORT = 3000;
 app.set('trust proxy', true)
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
+const DeviceDetector = require('node-device-detector');
+const detector = new DeviceDetector({
+  clientIndexes: true,
+  deviceIndexes: true,
+  deviceAliasCode: true,
+});
+
 //app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(async (req, res, next) => {
@@ -28,13 +35,13 @@ app.use(async (req, res, next) => {
 
 
     const userAgent = useragent.parse(req.headers['user-agent']);
+    const result = detector.detect(req.headers['user-agent']);
 
     req.userInfo = {
       private_ip: ipAddress,
       public_ip: clientIp,
       ip2: ip2,
-      device: userAgent.device.toString(),
-      os: userAgent.os.toString(),
+      device: JSON.stringify(result),
       browser: userAgent.toAgent(),
       location: `${location.city}, ${location.regionName}, ${location.country}`
     };
